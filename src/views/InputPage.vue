@@ -2,7 +2,7 @@
   <v-container>
     <v-row justify="center">
       <v-col cols="12" md="6">
-        <h1 class="text-center">COVID-19 Statistics Update</h1>
+        <h1 class="text-center">Enter Statistics</h1>
 
         <v-form ref="formRef" @submit.prevent="submitData">
           <!-- State Dropdown -->
@@ -61,16 +61,6 @@
           <!-- Submit Button -->
           <v-btn color="primary" class="mt-4" @click="submitData">Update</v-btn>
         </v-form>
-
-        <!-- Statistics Table -->
-        <h2 class="text-center mt-8">Statistics</h2>
-
-        <v-data-table
-          :headers="headers"
-          :items="displayData"
-          class="mt-4"
-          item-value="date"
-        ></v-data-table>
       </v-col>
     </v-row>
   </v-container>
@@ -78,18 +68,10 @@
 
 <script>
 import { ref, reactive, computed } from "vue";
-// import Datepicker from 'vue3-datepicker'
 
 export default {
-    // name:'RechercheDate',
-    // components: { 
-    //     Datepicker
-    // },
   setup() {
     const date = ref(new Date());
-    // let created = new Date().toISOString().split('T')[0]
-
-    // List of states with case data
     const states = ref([
       { name: "Assam", cases: 4357 },
       { name: "Delhi", cases: 8934 },
@@ -109,18 +91,14 @@ export default {
       deaths: null,
     });
 
-    const covidData = ref([]);
+    const inputData = ref([]);
     const menu = ref(false); // Controls the date picker menu
 
     // Table headers for displaying statistics
     const headers = [
-      { text: "Date", value: "date" },
-      { text: "Total Cases Reported", value: "totalCases" },
-      { text: "3-Day Moving Average (Cases)", value: "movingAverageCases" },
-      { text: "Recovered", value: "recovered" },
-      { text: "3-Day Moving Average (Recovered)", value: "movingAverageRecovered" },
-      { text: "Deaths", value: "deaths" },
-      { text: "3-Day Moving Average (Deaths)", value: "movingAverageDeaths" },
+      "Total Cases Reported",
+      "Recovered",
+      "Deaths"
     ];
 
     // Filtered and sorted list of states for dropdown
@@ -145,7 +123,7 @@ export default {
         form.deaths !== null
       ) {
         // Check if the entry for the date and state already exists
-        const existingEntry = covidData.value.find(
+        const existingEntry = inputData.value.find(
           (entry) => entry.date === form.date && entry.state === form.state
         );
         
@@ -155,47 +133,12 @@ export default {
           existingEntry.deaths = form.deaths;
         } else {
           // Add new entry if it doesn't exist
-          covidData.value.push({ ...form });
+          inputData.value.push({ ...form });
         }
-        calculateMovingAverages();
+        console.log('inputs:', inputData)
       }
     };
 
-    // Calculate 3-day moving average for cases, recovery, and deaths
-    const calculateMovingAverages = () => {
-      covidData.value.forEach((data, index, array) => {
-        if (index >= 2) {
-          data.movingAverageCases =
-            (array[index].newCases +
-              array[index - 1].newCases +
-              array[index - 2].newCases) /
-            3;
-          data.movingAverageRecovered =
-            (array[index].recovery +
-              array[index - 1].recovery +
-              array[index - 2].recovery) /
-            3;
-          data.movingAverageDeaths =
-            (array[index].deaths +
-              array[index - 1].deaths +
-              array[index - 2].deaths) /
-            3;
-        } else {
-          data.movingAverageCases = data.newCases;
-          data.movingAverageRecovered = data.recovery;
-          data.movingAverageDeaths = data.deaths;
-        }
-      });
-    };
-
-    // Display last 7 days of data
-    const displayData = computed(() => {
-      const lastWeekData = covidData.value.slice(-7);
-      return lastWeekData.map((day) => ({
-        ...day,
-        date: new Date(day.date).toLocaleDateString(),
-      }));
-    });
 
     return {
       form,
@@ -204,7 +147,6 @@ export default {
       filteredStates,
       onDateSelected,
       submitData,
-      displayData,
       headers,
     };
   },
